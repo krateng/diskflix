@@ -1,0 +1,48 @@
+:root {
+	--cover-width:150px;
+	--cover-ratio:1.5;
+}
+
+body {
+	background-color: black;
+	color: beige;
+	font-family: Barlow;
+	
+	padding:30px;
+}
+
+table td.mediainfo {
+	padding-left:30px;
+	vertical-align: top;
+	font-size: 200%;
+}
+
+.bg-image {
+	opacity:0.1;
+	position:fixed;
+	height:100%;
+	width:100%;
+	background-size:cover;
+	padding:0px;
+	margin:0px;
+	top: 0px;
+	left: 0px;
+	pointer-events:none;
+}
+
+.cover {
+	background-color:grey;
+	width:var(--cover-width);
+	height:calc(var(--cover-width) * var(--cover-ratio));
+	display:inline-block;
+	background-size:cover;
+	background-position:center;
+}
+.bigcover {
+	background-color:grey;
+	width:calc(2 * var(--cover-width));
+	height:calc(2 * var(--cover-width) * var(--cover-ratio));
+	display:inline-block;
+	background-size:cover;
+	background-position:center;
+}

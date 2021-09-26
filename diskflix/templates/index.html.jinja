@@ -1,0 +1,16 @@
+{% extends "base.html.jinja" %}
+
+{% block title %}Main{% endblock %}
+
+{% block body %}
+
+{% for movie in movies | sort(attribute='metadata.sorttitle') %}
+	{% set entity, type = movie, 'movie' %}
+	{% include 'partials/cover.html.jinja' %}
+{% endfor %}
+{% for show in shows | sort(attribute='metadata.sorttitle') %}
+	{% set entity, type = show, 'show' %}
+	{% include 'partials/cover.html.jinja' %}
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,6 @@
+media = {
+	'movies':[],
+	'shows':[],
+	'direct':{}
+}
+

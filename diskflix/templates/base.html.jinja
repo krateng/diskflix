@@ -1,0 +1,10 @@
+<html>
+	<head>
+		<title>Diskflix - {% block title %}{% endblock %}</title>
+		<link rel="stylesheet" type="text/css" href="static/style.css" />
+	</head>
+	<body>
+		<div class="bg-image" style="background-image:url('{% block bgimage %}{% endblock %}');"></div>
+		{% block body %}{% endblock %}
+	</body>
+</html>

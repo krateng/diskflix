@@ -1,0 +1,26 @@
+{% extends "base.html.jinja" %}
+
+{% set entity = direct[query.id] %}
+
+{% block title %}Main{% endblock %}
+{% block bgimage %}{{ entity.metadata.background }}{% endblock %}
+
+{% block body %}
+	<table>
+		<tr>
+			<td><div class="bigcover" style="background-image:url('{{ entity.metadata.cover }}');"></div></td>
+			<td class="mediainfo">
+				<h1>{{ entity.metadata.title }}</h1>
+				
+				{{ entity.metadata.desc }}
+			</td>
+		</tr>
+	</table>
+	
+	
+	<br/>
+	{% block contentarea %}
+	{% endblock %}
+
+
+{% endblock %}
