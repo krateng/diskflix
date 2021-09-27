@@ -1,14 +1,14 @@
 {% extends "base.html.jinja" %}
 
-{% set entity = direct[query.id] %}
+{% set entity = entities[query.id] %}
 
 {% block title %}Main{% endblock %}
-{% block bgimage %}{{ entity.metadata.background }}{% endblock %}
+{% block bgimage %}{{ entity.get_media('background') }}{% endblock %}
 
 {% block body %}
 	<table>
 		<tr>
-			<td><div class="bigcover" style="background-image:url('{{ entity.metadata.cover }}');"></div></td>
+			<td><div class="bigcover" style="background-image:url('{{ entity.get_media('cover') }}');"></div></td>
 			<td class="mediainfo">
 				<h1>{{ entity.metadata.title }}</h1>
 				

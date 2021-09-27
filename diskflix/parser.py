@@ -1,7 +1,9 @@
 import os
 import re
-from . import data
+from . import data, json
+from .entities import *
 import random
+import yaml
 
 FORMATS = {
 	'video':['mkv','webm','mp4','avi'],
@@ -19,16 +21,17 @@ REGEX = {
 	],
 	'season': [
 		re.compile(r'(?:s|season) ?([0-9]+)',re.IGNORECASE)
-	]
+	],
+	'coverimage': [
+		re.compile(r'(?:cover|poster).*',re.IGNORECASE)
+	],
+	'bgimage': [
+		re.compile(r'(?:bg|background).*',re.IGNORECASE)
+	],
+	'music': [
+		re.compile(r'(?:theme|music).*',re.IGNORECASE)
+	],
 }
-
-uid = 0
-def get_numbered_object():
-	global uid
-	uid += 1
-	obj = {'id':uid}
-	data.media['direct'][uid] = obj
-	return obj
 
 
 join = os.path.join
@@ -66,49 +69,8 @@ def guess_type(folders,files):
 		else: return 'movie'
 	else:
 		return 'show'
-	
-			
-	
 		
-	return None
-
-def parse_common(root):
-	info = get_numbered_object()
-	info.update({
-		'folder':root,
-		'presentation':{
-			'cover':[],
-			'background':[],
-			'music':[]
-		},
-		'metadata':{
-			'title':os.path.basename(root),
-			'sorttitle':os.path.basename(root),
-			'cover':'',
-			'background':'',
-			'music':'',
-		}
-	})
-	
-	imgfiles, audiofiles = filterfiles(filesin(root),['picture','audio'])
-	
-	for fn in imgfiles:
-		if 'background' in fn.lower():
-			info['presentation']['background'].append(join(root,fn))
-		if 'cover' in fn.lower() or 'poster' in fn.lower():
-			info['presentation']['cover'].append(join(root,fn))
-			
-	for fn in audiofiles:
-		if 'theme' in fn.lower():
-			info['presentation']['music'].append(join(root,fn))
-		
-		
-	
-		
-	return info
-
 def parse_season(root,parentshow,num):
-	info = get_numbered_object()
 	info.update({
 		'presentation':{
 			'cover':[],
@@ -217,16 +179,10 @@ def parse_tree(path):
 				dirs[:] = []
 				
 				if foldertype == 'show':
-					info = parse_show(root)
-					data.media['shows'].append(info)
+					data.media['shows'].append(Show(root))
 				elif foldertype == 'movie':
-					info = parse_movie(root)
-					data.media['movies'].append(info)
+					data.media['movies'].append(Movie(root))
 					
 	
-	for info in data.media['direct'].values():
-		for pres_type in ['background','cover','music']:
-			if info['metadata'][pres_type] == '' and info['presentation'][pres_type]:
-				info['metadata'][pres_type] = random.choice(info['presentation'][pres_type])
 
 

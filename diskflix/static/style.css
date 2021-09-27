@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@500&display=swap');
+
 :root {
 	--cover-width:150px;
 	--cover-ratio:1.5;
@@ -28,6 +30,7 @@ table td.mediainfo {
 	top: 0px;
 	left: 0px;
 	pointer-events:none;
+	z-index: -10;
 }
 
 .cover {
@@ -45,4 +48,5 @@ table td.mediainfo {
 	display:inline-block;
 	background-size:cover;
 	background-position:center;
+	box-shadow: 0px 0px 50px 2px rgb(255 255 255 / 20%)
 }

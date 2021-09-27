@@ -1,9 +1,13 @@
-from . import parser, data
+from . import parser, data, entities
 from pprint import pprint
 import bottle
 import waitress
 from jinja2 import Environment, PackageLoader
 import pkgutil
+
+HOST="localhost"
+PORT=8080
+THREADS=16
 
 jinjaenv = Environment(loader=PackageLoader('diskflix'))
 
@@ -16,7 +20,7 @@ def page(filename):
 	for k in query:
 		try: query[k] = int(query[k])
 		except: pass
-	return template.render(**data.media,query=query)
+	return template.render(**data.media,entities=entities.entities,query=query)
 
 @app.get('/static/<filename:path>.<ext>')
 def staticfile(filename,ext):
@@ -36,6 +40,6 @@ if __name__ == '__main__':
 	parser.parse_tree(".")
 	print("Loaded library!")
 		
-	print("Serving on localhost:8080...")
-	waitress.serve(app,host='localhost',port=8080,threads=16)	
+	print("Serving on " + HOST + ":" + str(PORT))
+	waitress.serve(app,host=HOST,port=PORT,threads=THREADS)	
 	#bottle.run(server='waitress',host='localhost',port=8080)
