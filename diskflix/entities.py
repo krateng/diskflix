@@ -3,43 +3,13 @@ import yaml
 import os
 import re
 
+from .regexes import try_match, REGEX, FORMATS
+
 entities = {}
 
-FORMATS = {
-	'video':['mkv','webm','mp4','avi'],
-	'audio':['mp3','flac','wav','ogg'],
-	'picture':['jpg','jpeg','png','webp'],
-	'metadata':['yml','yaml']
-}
-def regex_formats(filetype):
-	return r'\b(?:{0})\b'.format('|'.join(FORMATS[filetype]))
-	
-REGEX = {
-	'episode': [
-		re.compile(r'.*(?:s|season) ?([0-9]+) ?(?:e|episode) ?([0-9]+).*',re.IGNORECASE),
-		re.compile(r'.*([0-9]+)x([0-9]+).*',re.IGNORECASE),
-		re.compile(r'.*?()([0-9]+).*',re.IGNORECASE)
-	],
-	'season': [
-		re.compile(r'(?:s|season) ?([0-9]+).*',re.IGNORECASE)
-	],
-	'cover': [
-		re.compile(r'(?:cover|poster).*' + r'\.' + regex_formats('picture'),re.IGNORECASE)
-	],
-	'background': [
-		re.compile(r'(?:bg|background).*' + r'\.' + regex_formats('picture'),re.IGNORECASE)
-	],
-	'music': [
-		re.compile(r'(?:theme|music).*' + r'\.' + regex_formats('audio'),re.IGNORECASE)
-	],
-}
 
-def try_match(string,category):
-	for r in REGEX[category]:
-		match = r.match(string)
-		if match: return match
-	return None
-	
+
+
 	
 def ext(filename):
 	return filename.lower().split(".")[-1]
@@ -48,13 +18,13 @@ class Entity:
 
 	id_iter = itertools.count()
 	
-	def __init__(self,root):
+	def __init__(self,root,dedicated_folder=True):
 		self.folder = root
 		self.id = next(self.id_iter)
 		entities[self.id] = self
 		self.metadata = {
-			'title':os.path.basename(self.folder),
-			'sorttitle':os.path.basename(self.folder),
+			'title':None,
+			'sorttitle':None,
 			'cover':None,
 			'background':None,
 			'music':None,
@@ -63,8 +33,9 @@ class Entity:
 		self.parent = None
 		self.children = {}
 		
-		self.read_metadata()
-		self.load_metadata()
+		if dedicated_folder:
+			self.read_metadata()
+			self.load_metadata()
 		
 	def __json__(self):
 		return {
@@ -74,6 +45,9 @@ class Entity:
 			},
 			'metadata':self.metadata
 		}
+		
+	def get_link(self):
+		return "/" + self.entity_type + ".html?id=" + str(self.id)
 		
 	def list_files_in(self):
 		return [f for f in os.listdir(self.folder) if not os.path.isdir(os.path.join(self.folder,f))]
@@ -88,6 +62,8 @@ class Entity:
 		return open(os.path.join(self.folder,path))
 		
 	def read_metadata(self):
+		self.metadata['title'] = os.path.basename(self.folder)
+		self.metadata['sorttitle'] = os.path.basename(self.folder)
 		for f in self.list_files_in_by_type()['metadata']:
 			with self.open_file(f) as fd:
 				self.metadata.update(yaml.safe_load(fd))
@@ -118,11 +94,12 @@ class Entity:
 
 
 class Movie(Entity):
-	pass
+	entity_type = 'movie'
 	
 class Show(Entity):
-	def __init__(self,root):
-		super().__init__(root)
+	entity_type = 'show'
+	def __init__(self,root,**kwargs):
+		super().__init__(root,**kwargs)
 		self.seasons = self.children
 		self.get_seasons()
 		
@@ -143,7 +120,7 @@ class Show(Entity):
 				season,episode = match.groups()
 				if season.strip() == '': season = 1
 				s, e = int(season), int(episode)
-				self.seasons.setdefault(s,Season(self.folder,self))
+				self.seasons.setdefault(s,Season(self.folder,show=self,number=s,dedicated_folder=False))
 				self.seasons[s].episodes[e] = f
 		
 		
@@ -154,7 +131,7 @@ class Show(Entity):
 			if match:
 				season = match.groups()[0]
 				s = int(season)
-				self.seasons.setdefault(s,Season(os.path.join(self.folder,f),self))
+				self.seasons.setdefault(s,Season(os.path.join(self.folder,f),show=self,number=s))
 						
 		# check images that might belong to seasons
 		for f in self.list_files_in_by_type()['picture']:
@@ -162,13 +139,17 @@ class Show(Entity):
 			if match:
 				season = match.groups()[0]
 				s = int(season)
-				self.seasons.setdefault(s,Season(self.folder,self))
+				self.seasons.setdefault(s,Season(self.folder,show=self,number=s,dedicated_folder=False))
+				self.seasons[s].metadata['cover'] = f
 	
 class Season(Entity):
+	entity_type = 'season'
 
-	def __init__(self,root,show):
-		super().__init__(root)
+	def __init__(self,root,show,number,**kwargs):
+		super().__init__(root,**kwargs)
+		self.metadata['title'] = "Season " + str(number)
 		self.parent = show
+		self.show = self.parent
 		self.episodes = self.children
 	
 	def __json__(self):
@@ -176,6 +157,20 @@ class Season(Entity):
 			** super().__json__(),
 			'episodes':self.episodes	
 		}
+		
+	def load_metadata(self):
+		super().load_metadata()
+		if self.metadata['cover'] is not None and os.path.exists(os.path.join(self.folder,self.metadata['cover'])):
+			pass
+		else:
+			files = self.list_files_in_by_type()['picture']
+			#print('check files',files)
+			for f in files:
+				match = try_match(f,'season')
+				if match:
+					self.metadata['cover'] = f
+					break
+		
 
 	def get_media(self,mediatype):
 		if self.metadata[mediatype] is not None:
@@ -184,7 +179,7 @@ class Season(Entity):
 			return self.show.get_media(mediatype)
 
 class Episode(Entity):
-	def __init__(self,root,season):
-		super().__init__(root)
+	def __init__(self,root,season,**kwargs):
+		super().__init__(root,**kwargs)
 		self.parent = season
 		self.season = self.parent

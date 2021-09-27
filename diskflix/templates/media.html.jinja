@@ -10,7 +10,9 @@
 		<tr>
 			<td><div class="bigcover" style="background-image:url('{{ entity.get_media('cover') }}');"></div></td>
 			<td class="mediainfo">
+				{% if entity.parent %}<span class="titlecategory"><a href="{{ entity.parent.get_link() }}">{{ entity.parent.metadata.title }}</a></span>{% endif %}
 				<h1>{{ entity.metadata.title }}</h1>
+				<span class="cast">with {% include 'partials/cast.html.jinja' %}</span>
 				
 				{{ entity.metadata.desc }}
 			</td>

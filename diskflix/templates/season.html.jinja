@@ -1,0 +1,14 @@
+{% extends "media.html.jinja" %}
+
+
+{% block title %}{{ entity.metadata.title }}{% endblock %}
+
+{% block contentarea %}
+
+	{% for episode in entity.episodes | sort %}
+		{% set entity, type = entity.seasons[season], 'episode' %}
+		{% include 'partials/episode.html.jinja' %}
+	{% endfor %}
+	<br/><br/><br/>
+
+{% endblock %}

@@ -1,8 +1,8 @@
 {% extends "media.html.jinja" %}
 
-{% block title %}Main{% endblock %}
+{% block title %}{{ entity.metadata.title }}{% endblock %}
 
-{% block body %}
+{% block contentarea %}
 	{{ direct[query.id] }}
 
 {% endblock %}

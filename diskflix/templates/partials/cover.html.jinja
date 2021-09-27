@@ -1,5 +1,3 @@
-{% set coverimg = entity.metadata.cover %}
-
 <a href="/{{ type }}.html?id={{ entity.id }}">
 	<div class='cover {{ type }}' style="background-image:url('{{ entity.get_media('cover') }}')" title="{{ entity.metadata.title }}">
 

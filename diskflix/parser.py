@@ -2,37 +2,12 @@ import os
 import re
 from . import data, json
 from .entities import *
+from .regexes import REGEX, FORMATS
 import random
 import yaml
 
-FORMATS = {
-	'video':['mkv','webm','mp4','avi'],
-	'audio':['mp3','flac'],
-	'picture':['jpg','jpeg','png','webp'],
-	'metadata':['yml']
-}
+
 IGNOREFILES = ['.diskflix_ignore']
-
-REGEX = {
-	'episode': [
-		re.compile(r'.*(?:s|season) ?([0-9]+) ?(?:e|episode) ?([0-9]+).*',re.IGNORECASE),
-		re.compile(r'.*([0-9]+)x([0-9]+).*',re.IGNORECASE),
-		re.compile(r'.*?()([0-9]+).*',re.IGNORECASE)
-	],
-	'season': [
-		re.compile(r'(?:s|season) ?([0-9]+)',re.IGNORECASE)
-	],
-	'coverimage': [
-		re.compile(r'(?:cover|poster).*',re.IGNORECASE)
-	],
-	'bgimage': [
-		re.compile(r'(?:bg|background).*',re.IGNORECASE)
-	],
-	'music': [
-		re.compile(r'(?:theme|music).*',re.IGNORECASE)
-	],
-}
-
 
 join = os.path.join
 

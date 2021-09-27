@@ -1,0 +1,6 @@
+{% for role,person in entity.metadata.cast.items() %}
+
+<a href="/person.html?name={{ person | lower | replace(' ','') }}">{{ person }}</a> as {{ role }}{% if not loop.last %}, {% endif %}
+
+
+{% endfor %}
